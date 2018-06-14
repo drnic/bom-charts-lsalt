@@ -8,6 +8,8 @@
     "node": "^8.11.2"
   },
   "dependencies": {
+    "@turf/helpers": "^6.1.4",
+    "@turf/intersect": "^6.1.2",
     "cfenv": "drnic/node-cfenv#typescript",
     "express": "^4.16.3",
     "request": "^2.87.0",
