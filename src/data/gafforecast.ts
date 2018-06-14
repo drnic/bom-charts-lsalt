@@ -68,7 +68,12 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
         return;
       }
 
+      var areaCloudLayerBase = mapArea.cloudBase() === undefined ? 10000 : mapArea.cloudBase();
+      var cloudBaseLSALTDelta = areaCloudLayerBase - (lsalt * 100);
+      var layerColourIndex = Math.round(cloudBaseLSALTDelta / 1000);
+
       lsaltIntersection.properties["lsalt_100ft"] = lsalt;
+      lsaltIntersection.properties["lsalt_color_level"] = layerColourIndex;
       mapAreaLSALT.push(lsaltIntersection);
     });
   });
