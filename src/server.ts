@@ -23,7 +23,12 @@ console.log(`Requests on path ${appURLPath}`);
 app.get(appURLPath, function (req, res: express.Response) {
   let url = _.clone(mainAppURL);
   url.pathname = "/json/lsalt-TAS.json";
-  request(URL.format(url)).pipe(res);
+  request(URL.format(url))
+    .on('error', (err) => {
+      console.log(err);
+      res.json({"error": "connecting to backend API"});
+    })
+    .pipe(res);
 })
 
 // locally provide $PORT
