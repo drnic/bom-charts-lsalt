@@ -8,17 +8,17 @@ import * as lsalt from './data/lsalt';
 let app = express()
 let appEnv = cfenv.getAppEnv();
 
-let mainAppURL: URL.UrlWithStringQuery;
+let backendURL: URL.UrlWithStringQuery;
 let appURLPath = "/";
 
 if (process.env.BACKEND_URL) {
-  mainAppURL = URL.parse(process.env.BACKEND_URL);
+  backendURL = URL.parse(process.env.BACKEND_URL);
 } else {
   appURLPath = URL.parse(appEnv.url).pathname;
-  mainAppURL = URL.parse(appEnv.url);
+  backendURL = URL.parse(appEnv.url);
 }
 
-lsalt.init(mainAppURL);
+lsalt.init(backendURL);
 
 console.log(`Requests on path ${appURLPath}`);
 
