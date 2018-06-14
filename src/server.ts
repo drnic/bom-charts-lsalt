@@ -17,12 +17,14 @@ lsalt.init();
 gafforecast.update();
 setInterval(gafforecast.update, 1000*60*60);
 
-
-app.get('*', function (req, res) {
-  // res.json(gafforecast.forecasts["QLD-S"]);
+function lsaltFeatureCollection(req: express.Request, res: express.Response) {
   let vfr = req.query["vfr"] || "day";
   res.json(gafforecast.lsaltFeatureCollection(vfr == "night"));
-})
+}
+app.get('/', lsaltFeatureCollection)
+
+// Duplicate endpoints to allow backend to proxy requests during local dev/text
+app.get('/lsalt', lsaltFeatureCollection)
 
 // app.get('*', function(req, res) {
 //   res.json(req.originalUrl);
