@@ -6,24 +6,23 @@ import * as lsalt from './lsalt';
 export let data: { [gafAreaCode: string]: GAFPeriods} = {};
 
 export function update() {
-  let period = "current";
-  gaf.areaCodes.forEach(gafAreaCode => {
-    let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
+  Object.keys(gaf.Period).forEach((period) => {
+    gaf.areaCodes.forEach(gafAreaCode => {
+      let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
 
-    request(url, (error, response, body) => {
-      let forecastData : GAFAreaForecast = JSON.parse(body);
+      request(url, (error, response, body) => {
+        let forecastData : GAFAreaForecast = JSON.parse(body);
 
-      data[gafAreaCode] = data[gafAreaCode] || {};
-      data[gafAreaCode][forecastData.from.toString()] = forecastData;
-      console.log(`${forecastData.gaf_area_id} ${forecastData.from} - ${lsalt.ready}`);
+        data[gafAreaCode] = data[gafAreaCode] || {};
+        data[gafAreaCode][forecastData.from.toString()] = forecastData;
+        console.log(`${forecastData.gaf_area_id} ${forecastData.from} - ${lsalt.ready}`);
+      });
     });
-  });
-
+  })
 }
 
 
-
-export type GAFPeriods = { [from: string]: GAFAreaForecast };
+export type GAFPeriods = { [fromUTC: string]: GAFAreaForecast };
 
 export interface GAFAreaForecast {
   page_code: string;
