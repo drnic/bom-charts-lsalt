@@ -18,16 +18,16 @@ gafforecast.update();
 setInterval(gafforecast.update, 1000*60*60);
 
 
-app.get(appURLPath, function (req, res) {
+app.get('*', function (req, res) {
   // res.json(gafforecast.forecasts["QLD-S"]);
   let vfr = req.query["vfr"] || "day";
-  console.log(vfr);
-  if (vfr == "day") {
-    res.json(gafforecast.dayMapAreaLSALT);
-  } else {
-    res.json(gafforecast.nightMapAreaLSALT);
-  }
+  res.json(gafforecast.lsaltFeatureCollection(vfr == "night"));
 })
+
+// app.get('*', function(req, res) {
+//   res.json(req.originalUrl);
+// });
+
 
 // locally provide $PORT
 app.listen(appEnv.port);

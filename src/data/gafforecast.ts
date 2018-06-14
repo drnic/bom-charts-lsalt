@@ -8,13 +8,16 @@ import * as maparea from './maparea';
 
 export let forecasts: { [gafAreaCode: string]: GAFPeriods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
-export let dayMapAreaLSALT: { [gafAreaCode: string]: turf.Feature[] } = {};
-export let nightMapAreaLSALT: { [gafAreaCode: string]: turf.Feature[] } = {};
+export let dayMapAreaLSALT: turf.Feature[] = [];
+export let nightMapAreaLSALT: turf.Feature[] = [];
 
 /**
  * Hourly update of current/next Graphical Area Forecasts (GAF)
  */
 export function update() {
+  dayMapAreaLSALT = [];
+  nightMapAreaLSALT = [];
+
   Object.keys(gaf.Period).forEach((period) => {
     gaf.areaCodes.forEach(gafAreaCode => {
       let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
@@ -30,16 +33,22 @@ export function update() {
         mapareas[gafAreaCode] = buildMapAreas(forecastData);
 
         // slice up MapAreas with LSALT grids for day & night
-        updateLSALT(gafAreaCode, mapareas[gafAreaCode]);
-        updateLSALT(gafAreaCode, mapareas[gafAreaCode], true);
+        updateLSALTFeatures(gafAreaCode);
+        updateLSALTFeatures(gafAreaCode, true);
       });
     });
   })
 }
 
-function updateLSALT(gafAreaCode: string, mapAreas: maparea.MapArea[], nightVFR?: boolean) {
+export function lsaltFeatureCollection(nightVFR?: boolean) : turf.FeatureCollection {
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
-  mapAreaLSALT[gafAreaCode] = [];
+
+  return turf.featureCollection(mapAreaLSALT);
+}
+
+function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
+  let mapAreas = mapareas[gafAreaCode];
+  let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   lsalt.data[gafAreaCode].forEach(lsaltGrid => {
     var grid = lsaltGrid.grid;
@@ -60,7 +69,7 @@ function updateLSALT(gafAreaCode: string, mapAreas: maparea.MapArea[], nightVFR?
       }
 
       lsaltIntersection.properties["lsalt_100ft"] = lsalt;
-      mapAreaLSALT[gafAreaCode].push(lsaltIntersection);
+      mapAreaLSALT.push(lsaltIntersection);
     });
   });
 }
