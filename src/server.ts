@@ -1,18 +1,29 @@
 import * as express from 'express';
 import * as URL from 'url';
+import * as _ from 'underscore';
 import * as cfenv from 'cfenv';
+
+import * as request from 'request';
 
 let app = express()
 let appEnv = cfenv.getAppEnv();
 
-let appURLPath: string = URL.parse(appEnv.url).pathname;
+let mainAppURL: URL.UrlWithStringQuery;
+let appURLPath = "/";
+
+if (process.env.BACKEND_URL) {
+  mainAppURL = URL.parse(process.env.BACKEND_URL);
+} else {
+  appURLPath = URL.parse(appEnv.url).pathname;
+  mainAppURL = URL.parse(appEnv.url);
+}
 console.log(`Requests on path ${appURLPath}`);
 
-let mainAppURL: URL.UrlWithStringQuery = URL.parse(appEnv.url);
-mainAppURL.pathname = "";
 
-app.get(appURLPath, function (_, res: express.Response) {
-  res.json(URL.format(mainAppURL));
+app.get(appURLPath, function (req, res: express.Response) {
+  let url = _.clone(mainAppURL);
+  url.pathname = "/json/lsalt-TAS.json";
+  request(URL.format(url)).pipe(res);
 })
 
 // locally provide $PORT
