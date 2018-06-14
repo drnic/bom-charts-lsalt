@@ -17,7 +17,8 @@ lsalt.init();
 gafforecast.update();
 
 app.get(appURLPath, function (req, res) {
-  res.json(gafforecast.data["QLD-S"]);
+  // res.json(gafforecast.forecasts["QLD-S"]);
+  res.json(gafforecast.mapareas);
 })
 
 // locally provide $PORT
