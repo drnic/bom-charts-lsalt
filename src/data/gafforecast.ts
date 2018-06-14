@@ -29,8 +29,9 @@ export function update() {
         // create MapAreas
         mapareas[gafAreaCode] = buildMapAreas(forecastData);
 
-        // slice up MapAreas with LSALT grids
+        // slice up MapAreas with LSALT grids for day & night
         updateLSALT(gafAreaCode, mapareas[gafAreaCode]);
+        updateLSALT(gafAreaCode, mapareas[gafAreaCode], true);
       });
     });
   })

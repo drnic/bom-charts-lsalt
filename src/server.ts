@@ -20,7 +20,13 @@ setInterval(gafforecast.update, 1000*60*60);
 
 app.get(appURLPath, function (req, res) {
   // res.json(gafforecast.forecasts["QLD-S"]);
-  res.json(gafforecast.dayMapAreaLSALT);
+  let vfr = req.query["vfr"] || "day";
+  console.log(vfr);
+  if (vfr == "day") {
+    res.json(gafforecast.dayMapAreaLSALT);
+  } else {
+    res.json(gafforecast.nightMapAreaLSALT);
+  }
 })
 
 // locally provide $PORT
