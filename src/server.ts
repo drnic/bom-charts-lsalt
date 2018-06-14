@@ -4,26 +4,20 @@ import * as cfenv from 'cfenv';
 // import * as turf from 'turf';
 
 import * as lsalt from './data/lsalt';
+import * as gafforecast from './data/gafforecast';
 
 let app = express()
+
+
 let appEnv = cfenv.getAppEnv();
-
-let backendURL: URL.UrlWithStringQuery;
-let appURLPath = "/";
-
-if (process.env.BACKEND_URL) {
-  backendURL = URL.parse(process.env.BACKEND_URL);
-} else {
-  appURLPath = URL.parse(appEnv.url).pathname;
-  backendURL = URL.parse(appEnv.url);
-}
-
-lsalt.init(backendURL);
-
+let appURLPath = URL.parse(appEnv.url).pathname;
 console.log(`Requests on path ${appURLPath}`);
 
+lsalt.init();
+gafforecast.update();
+
 app.get(appURLPath, function (req, res: express.Response) {
-  res.json(lsalt.ready);
+  res.json(gafforecast.data["QLD-S"]);
 })
 
 // locally provide $PORT
