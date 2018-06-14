@@ -23,7 +23,7 @@ lsalt.init(mainAppURL);
 console.log(`Requests on path ${appURLPath}`);
 
 app.get(appURLPath, function (req, res: express.Response) {
-  res.json(lsalt.data['WA-S']);
+  res.json(lsalt.ready);
 })
 
 // locally provide $PORT

@@ -9,6 +9,7 @@ export interface LSALTGrid {
   lsalt_100ft: number;
 }
 export let data: { [gafAreaCode: string]: LSALTGrid[] } = {}
+export let ready = false;
 
 export function init(mainAppURL: URL.UrlWithStringQuery) {
   gafAreaCodes.forEach(gafAreaCode => {
@@ -18,6 +19,16 @@ export function init(mainAppURL: URL.UrlWithStringQuery) {
     request(URL.format(url), (error, response, body) => {
       console.log(gafAreaCode);
       data[gafAreaCode] = JSON.parse(body);
+      checkIsReady();
     });
   });
+}
+
+function checkIsReady() {
+  gafAreaCodes.forEach(gafAreaCode => {
+    if (data[gafAreaCode] === undefined) {
+      return;
+    }
+  });
+  ready = true;
 }
