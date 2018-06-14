@@ -21,14 +21,18 @@ function lsaltFeatureCollection(req: express.Request, res: express.Response) {
   let vfr = req.query["vfr"] || "day";
   res.json(gafforecast.lsaltFeatureCollection(vfr == "night"));
 }
+
+function gafAreasFeatureCollection(req: express.Request, res: express.Response) {
+  let from = req.query["from"];
+  res.json(gafforecast.gafAreasFeatureCollection(from));
+}
+
 app.get('/', lsaltFeatureCollection)
+app.get('/gafareas', gafAreasFeatureCollection)
 
 // Duplicate endpoints to allow backend to proxy requests during local dev/text
 app.get('/lsalt', lsaltFeatureCollection)
-
-// app.get('*', function(req, res) {
-//   res.json(req.originalUrl);
-// });
+app.get('/lsalt/gafareas', gafAreasFeatureCollection)
 
 
 // locally provide $PORT

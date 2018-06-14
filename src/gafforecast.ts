@@ -5,6 +5,7 @@ import * as backend from './data/backend';
 import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
 import * as maparea from './data/maparea';
+import { Polygon } from '@turf/helpers';
 
 export let forecasts: { [gafAreaCode: string]: gaf.Periods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
@@ -40,10 +41,32 @@ export function update() {
   })
 }
 
-export function lsaltFeatureCollection(nightVFR?: boolean) : turf.FeatureCollection {
+/**
+ * Subset of LSALT grids indicating the gap between lowest cloud layer and LSALT height.
+ * @param nightVFR If true, pilots must fly 1000-1360' above highest point in each LSALT grid. If false, pilots can fly lower and clouds can be lower.
+ * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
+ */
+export function lsaltFeatureCollection(nightVFR?: boolean, from?: string | Date) : turf.FeatureCollection {
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   return turf.featureCollection(mapAreaLSALT);
+}
+
+/**
+ * Nationwide GAFs for a specific time period
+ * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
+ */
+export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCollection {
+  let features : turf.Feature[] = [];
+  Object.entries(mapareas).forEach(
+    ([gafAreaCode, areas]) => {
+      areas.forEach((mapArea: maparea.MapArea) => {
+        features.push(mapArea.asFeature());
+      })
+    }
+  );
+
+  return turf.featureCollection(features);
 }
 
 function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
