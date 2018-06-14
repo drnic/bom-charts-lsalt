@@ -15,6 +15,8 @@ console.log(`Requests on path ${appURLPath}`);
 
 lsalt.init();
 gafforecast.update();
+setInterval(gafforecast.update, 1000*60*60);
+
 
 app.get(appURLPath, function (req, res) {
   // res.json(gafforecast.forecasts["QLD-S"]);
