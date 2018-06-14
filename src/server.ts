@@ -16,7 +16,7 @@ console.log(`Requests on path ${appURLPath}`);
 lsalt.init();
 gafforecast.update();
 
-app.get(appURLPath, function (req, res: express.Response) {
+app.get(appURLPath, function (req, res) {
   res.json(gafforecast.data["QLD-S"]);
 })
 

@@ -1,6 +1,7 @@
 import * as request from 'request';
 import * as backend from './backend';
 import * as gaf from './gaf';
+import * as lsalt from './lsalt';
 
 export let data: { [gafAreaCode: string]: GAFPeriods} = {};
 
@@ -10,13 +11,11 @@ export function update() {
     let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
 
     request(url, (error, response, body) => {
-      let forecastData = JSON.parse(body);
+      let forecastData : GAFAreaForecast = JSON.parse(body);
+
       data[gafAreaCode] = data[gafAreaCode] || {};
-      if (period == gaf.Period.current) {
-        data[gafAreaCode].current = forecastData;
-      } else {
-        data[gafAreaCode].next = forecastData;
-      }
+      data[gafAreaCode][forecastData.from.toString()] = forecastData;
+      console.log(`${forecastData.gaf_area_id} ${forecastData.from} - ${lsalt.ready}`);
     });
   });
 
@@ -24,10 +23,7 @@ export function update() {
 
 
 
-export interface GAFPeriods {
-  current?: GAFAreaForecast;
-  next?: GAFAreaForecast;
-}
+export type GAFPeriods = { [from: string]: GAFAreaForecast };
 
 export interface GAFAreaForecast {
   page_code: string;
