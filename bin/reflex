@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR/..
+
+reflex -r '.ts$' -s -- sh -c 'tsc && PORT=4000 BACKEND_URL=http://localhost:3000 npm run-script server'
