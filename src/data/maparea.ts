@@ -31,11 +31,24 @@ abstract class MapAreaBase {
     return this._turfPolygon;
   }
 
+  /**
+   * Pilots flying below clouds must maintain 1000' clearance (unless in class G), and maintain 500'+ above ground.
+   * If night VFR, they must be 1000-1360' above highest point (lowest safe altitude/LSALT).
+   * So we want to give them an indication of how much clearance between ground/LSALT and lowest cloud base.
+   * We return a number between 0 (minimal to negative gap between cloud base and highest ground) and 3 (3000+ feet clearance).
+   */
+  lsaltColorLevel() : number {
+    var areaCloudLayerBase = this.cloudBase() === undefined ? 10000 : this.cloudBase();
+    var areaCloudLayerBaseCode = Math.round(areaCloudLayerBase / 1000);
+    return Math.min(3, Math.max(0, areaCloudLayerBaseCode));
+  }
+
   asFeature() : turf.Feature<turf.Polygon, turf.Properties> {
     return {
       "type": "Feature",
       "properties": {
-        "mapLayerID": this.mapLayerID()
+        "mapLayerID": this.mapLayerID(),
+        "lsaltColorLevel": this.lsaltColorLevel()
       },
       "geometry": {
         "type": "Polygon",

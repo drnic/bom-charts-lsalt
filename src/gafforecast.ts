@@ -96,7 +96,7 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
       var layerColourIndex = Math.round(cloudBaseLSALTDelta / 1000);
 
       lsaltIntersection.properties["lsalt_100ft"] = lsalt;
-      lsaltIntersection.properties["lsalt_color_level"] = layerColourIndex;
+      lsaltIntersection.properties["lsaltColorLevel"] = layerColourIndex;
       mapAreaLSALT.push(lsaltIntersection);
     });
   });
