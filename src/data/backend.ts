@@ -1,6 +1,5 @@
 import * as cfenv from 'cfenv';
 import * as _ from 'underscore';
-import * as request from 'request';
 import * as URL from 'url';
 
 export let backendURL: URL.UrlWithStringQuery;

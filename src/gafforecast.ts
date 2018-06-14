@@ -1,12 +1,12 @@
 import * as request from 'request';
 import * as turf from '@turf/helpers';
 import * as turfintersect from '@turf/intersect';
-import * as backend from './backend';
-import * as gaf from './gaf';
-import * as lsalt from './lsalt';
-import * as maparea from './maparea';
+import * as backend from './data/backend';
+import * as gaf from './data/gaf';
+import * as lsalt from './data/lsalt';
+import * as maparea from './data/maparea';
 
-export let forecasts: { [gafAreaCode: string]: GAFPeriods} = {};
+export let forecasts: { [gafAreaCode: string]: gaf.Periods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
 export let dayMapAreaLSALT: turf.Feature[] = [];
 export let nightMapAreaLSALT: turf.Feature[] = [];
@@ -23,7 +23,7 @@ export function update() {
       let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
 
       request(url, (error, response, body) => {
-        let forecastData : GAFAreaForecast = JSON.parse(body);
+        let forecastData : gaf.AreaForecast = JSON.parse(body);
 
         forecasts[gafAreaCode] = forecasts[gafAreaCode] || {};
         forecasts[gafAreaCode][forecastData.from.toString()] = forecastData;
@@ -79,14 +79,14 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
   });
 }
 
-function buildMapAreas(areaForecast: GAFAreaForecast) : maparea.MapArea[] {
+function buildMapAreas(areaForecast: gaf.AreaForecast) : maparea.MapArea[] {
   let result: maparea.MapArea[] = [];
 
-  areaForecast.areas.forEach((gafarea: Area) => {
+  areaForecast.areas.forEach((gafarea: gaf.Area) => {
     let majorArea = new maparea.MajorArea(areaForecast.gaf_area_id, gafarea);
     result.push(majorArea);
 
-    majorArea.gafMajorArea.sub_areas.forEach((subarea: SubArea) => {
+    majorArea.gafMajorArea.sub_areas.forEach((subarea: gaf.SubArea) => {
       let mapSubArea = new maparea.SubArea(majorArea, subarea);
       result.push(mapSubArea);
     });
@@ -95,81 +95,3 @@ function buildMapAreas(areaForecast: GAFAreaForecast) : maparea.MapArea[] {
   return result;
 }
 
-export type GAFPeriods = { [fromUTC: string]: GAFAreaForecast };
-
-export interface GAFAreaForecast {
-  page_code: string;
-  gaf_area_id: string;
-  from: Date;
-  till: Date;
-  issued_at: Date;
-  standard_inclusion: string;
-  areas: Area[];
-  boundary: Boundary;
-}
-
-export interface Boundary {
-  points: number[][];
-}
-
-export interface CloudLayer {
-    amount: string;
-    type: string;
-    base: number;
-    top: number;
-    night_only_base: number;
-    night_only_top: number;
-    cumulus: boolean;
-}
-
-export interface SurfaceVisWx {
-    text: string;
-    surface_vis: number;
-    sub_areas_mentioned: string[];
-}
-
-export interface CloudIceTurb {
-    text: string;
-    parsed: ParsedCloudLayer;
-    sub_areas_mentioned: string[];
-}
-
-export interface ParsedCloudLayer {
-  cloud: CloudLayer;
-}
-
-export interface WxCond {
-    surface_vis_wx: SurfaceVisWx;
-    cloud_ice_turb: CloudIceTurb[];
-}
-
-export interface Area {
-    area_id: string;
-    wx_cond: WxCond[];
-    freezing_level: string;
-    boundary: Boundary;
-    day_cloud_base: number;
-    day_cloud_top: number;
-    night_cloud_base: number;
-    night_cloud_top: number;
-    sub_areas: SubArea[];
-}
-
-export interface SubArea {
-  area_id: string;
-  sub_area_id: string;
-  boundary: Boundary;
-  day_cloud_base: number;
-  day_cloud_top: number;
-  night_cloud_base: number;
-  night_cloud_top: number;
-}
-
-export interface CommonArea {
-  area_id: string;
-  boundary: Boundary;
-  day_cloud_base: number;
-  day_cloud_top: number;
-  night_cloud_base: number;
-  night_cloud_top: number;
-}

@@ -4,7 +4,7 @@ import * as cfenv from 'cfenv';
 // import * as turf from 'turf';
 
 import * as lsalt from './data/lsalt';
-import * as gafforecast from './data/gafforecast';
+import * as gafforecast from './gafforecast';
 
 let app = express()
 
