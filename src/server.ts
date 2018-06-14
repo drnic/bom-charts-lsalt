@@ -20,7 +20,7 @@ setInterval(gafforecast.update, 1000*60*60);
 
 app.get(appURLPath, function (req, res) {
   // res.json(gafforecast.forecasts["QLD-S"]);
-  res.json(gafforecast.mapareas);
+  res.json(gafforecast.dayMapAreaLSALT);
 })
 
 // locally provide $PORT

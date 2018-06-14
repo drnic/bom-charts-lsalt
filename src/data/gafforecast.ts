@@ -8,6 +8,8 @@ import * as maparea from './maparea';
 
 export let forecasts: { [gafAreaCode: string]: GAFPeriods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
+export let dayMapAreaLSALT: { [gafAreaCode: string]: turf.Feature[] } = {};
+export let nightMapAreaLSALT: { [gafAreaCode: string]: turf.Feature[] } = {};
 
 /**
  * Hourly update of current/next Graphical Area Forecasts (GAF)
@@ -35,6 +37,9 @@ export function update() {
 }
 
 function updateLSALT(gafAreaCode: string, mapAreas: maparea.MapArea[], nightVFR?: boolean) {
+  let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
+  mapAreaLSALT[gafAreaCode] = [];
+
   lsalt.data[gafAreaCode].forEach(lsaltGrid => {
     var grid = lsaltGrid.grid;
     var lsalt = lsaltGrid.lsalt_100ft;
@@ -53,7 +58,8 @@ function updateLSALT(gafAreaCode: string, mapAreas: maparea.MapArea[], nightVFR?
         return;
       }
 
-      console.log(lsaltIntersection.geometry.coordinates);
+      lsaltIntersection.properties["lsalt_100ft"] = lsalt;
+      mapAreaLSALT[gafAreaCode].push(lsaltIntersection);
     });
   });
 }
