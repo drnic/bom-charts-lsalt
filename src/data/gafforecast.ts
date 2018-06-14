@@ -1,13 +1,17 @@
 import * as request from 'request';
+import * as turf from '@turf/helpers';
+import * as turfintersect from '@turf/intersect';
 import * as backend from './backend';
 import * as gaf from './gaf';
 import * as lsalt from './lsalt';
 import * as maparea from './maparea';
-import { Result } from 'range-parser';
 
 export let forecasts: { [gafAreaCode: string]: GAFPeriods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
 
+/**
+ * Hourly update of current/next Graphical Area Forecasts (GAF)
+ */
 export function update() {
   Object.keys(gaf.Period).forEach((period) => {
     gaf.areaCodes.forEach(gafAreaCode => {
@@ -23,10 +27,35 @@ export function update() {
         // create MapAreas
         mapareas[gafAreaCode] = buildMapAreas(forecastData);
 
-        // TODO: slice up MapAreas with LSALT
+        // slice up MapAreas with LSALT grids
+        updateLSALT(gafAreaCode, mapareas[gafAreaCode]);
       });
     });
   })
+}
+
+function updateLSALT(gafAreaCode: string, mapAreas: maparea.MapArea[], nightVFR?: boolean) {
+  lsalt.data[gafAreaCode].forEach(lsaltGrid => {
+    var grid = lsaltGrid.grid;
+    var lsalt = lsaltGrid.lsalt_100ft;
+    if (!nightVFR) {
+      // assume pilot can see highest object; and that LSALT is 1300' higher than highest object
+      lsalt -= 13;
+    }
+
+    var lsaltPolygon = turf.polygon([grid]);
+
+    mapAreas.forEach(mapArea => {
+      var mapAreaPolygon = mapArea.turfPolygon();
+
+      var lsaltIntersection = turfintersect.default(mapAreaPolygon, lsaltPolygon)
+      if (!lsaltIntersection) {
+        return;
+      }
+
+      console.log(lsaltIntersection.geometry.coordinates);
+    });
+  });
 }
 
 function buildMapAreas(areaForecast: GAFAreaForecast) : maparea.MapArea[] {
