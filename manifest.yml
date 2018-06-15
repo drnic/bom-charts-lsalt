@@ -5,5 +5,5 @@ applications:
   instances: 1
   memory: 64M
   routes:
-  - route: bom-charts-staging.cfapps.io/lsalt
+  - route: bom-charts-staging.cfapps.io/api2
   stack: cflinuxfs2
