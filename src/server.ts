@@ -31,9 +31,9 @@ function gafAreasDateRanges(req: express.Request, res: express.Response) {
   res.json(gafforecast.dateRanges);
 }
 
-app.get('/lsalt/features', lsaltFeatureCollection)
-app.get('/gafareas/features', gafAreasFeatureCollection)
-app.get('/gafareas/dates', gafAreasDateRanges)
+app.get('/lsalt-features', lsaltFeatureCollection)
+app.get('/gafareas-features', gafAreasFeatureCollection)
+app.get('/gafareas-dates', gafAreasDateRanges)
 
 // Duplicate endpoints to allow backend to proxy requests during local dev/text
 // app.get('/lsalt', lsaltFeatureCollection)
