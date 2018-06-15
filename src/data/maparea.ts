@@ -61,6 +61,7 @@ abstract class MapAreaBase {
 
   abstract areaGroup() : string;
   abstract gafAreaCodeAndGroup() : string;
+  abstract groupLabel() : string;
   abstract majorArea() : MajorArea;
   abstract isSubArea() : boolean;
   abstract freezingLevel() : string;

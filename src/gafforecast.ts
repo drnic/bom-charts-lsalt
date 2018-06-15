@@ -5,7 +5,6 @@ import * as backend from './data/backend';
 import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
 import * as maparea from './data/maparea';
-import { Polygon } from '@turf/helpers';
 
 export let forecasts: { [gafAreaCode: string]: gaf.Periods} = {};
 export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
@@ -94,9 +93,11 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
       var areaCloudLayerBase = mapArea.cloudBase() === undefined ? 10000 : mapArea.cloudBase();
       var cloudBaseLSALTDelta = areaCloudLayerBase - (lsalt * 100);
       var layerColourIndex = Math.round(cloudBaseLSALTDelta / 1000);
+      var boundedIndex = Math.min(3, Math.max(0, layerColourIndex));
 
       lsaltIntersection.properties["lsalt_100ft"] = lsalt;
       lsaltIntersection.properties["lsaltColorLevel"] = layerColourIndex;
+      lsaltIntersection.properties["lsaltColorLevelSameAsArea"] = mapArea.lsaltColorLevel() == boundedIndex ? 1 : 0;
       mapAreaLSALT.push(lsaltIntersection);
     });
   });
