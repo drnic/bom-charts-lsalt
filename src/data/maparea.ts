@@ -48,7 +48,8 @@ abstract class MapAreaBase {
       "type": "Feature",
       "properties": {
         "mapLayerID": this.mapLayerID(),
-        "lsaltColorLevel": this.lsaltColorLevel()
+        "lsaltColorLevel": this.lsaltColorLevel(),
+        "wxSummary": this.wxSummary()
       },
       "geometry": {
         "type": "Polygon",
@@ -57,7 +58,16 @@ abstract class MapAreaBase {
     };
   }
 
-  cloudBase() { return this.gafArea.day_cloud_base; }
+  cloudBase(): number { return this.gafArea.day_cloud_base; }
+  wxSummary(): string {
+    var text = this.mapLabel();
+    if (this.cloudBase() === undefined || this.cloudBase() === 999999) {
+      text += " has N/A clouds";
+    } else {
+      text += " has cloud base " + this.cloudBase() + "MSL";
+    }
+    return text;
+  }
 
   abstract areaGroup() : string;
   abstract gafAreaCodeAndGroup() : string;
@@ -67,7 +77,6 @@ abstract class MapAreaBase {
   abstract freezingLevel() : string;
   abstract mapLabel() : string;
   abstract mapLayerID() : string;
-
 }
 
 export class MajorArea extends MapAreaBase {
