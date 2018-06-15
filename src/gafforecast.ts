@@ -11,12 +11,15 @@ export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
 export let dayMapAreaLSALT: turf.Feature[] = [];
 export let nightMapAreaLSALT: turf.Feature[] = [];
 
+let gridID = 1;
+
 /**
  * Hourly update of current/next Graphical Area Forecasts (GAF)
  */
 export function update() {
   dayMapAreaLSALT = [];
   nightMapAreaLSALT = [];
+  gridID = 1;
 
   Object.keys(gaf.Period).forEach((period) => {
     gaf.areaCodes.forEach(gafAreaCode => {
@@ -95,6 +98,8 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
       var layerColourIndex = Math.round(cloudBaseLSALTDelta / 1000);
       var boundedIndex = Math.min(3, Math.max(0, layerColourIndex));
 
+      lsaltIntersection.properties["id"] = gridID;
+      gridID += 1;
       lsaltIntersection.properties["lsalt_100ft"] = lsalt;
       lsaltIntersection.properties["lsaltColorLevel"] = layerColourIndex;
       lsaltIntersection.properties["lsaltColorLevelSameAsArea"] = mapArea.lsaltColorLevel() == boundedIndex ? 1 : 0;
