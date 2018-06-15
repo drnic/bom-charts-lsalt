@@ -27,12 +27,17 @@ function gafAreasFeatureCollection(req: express.Request, res: express.Response) 
   res.json(gafforecast.gafAreasFeatureCollection(from));
 }
 
-app.get('/', lsaltFeatureCollection)
-app.get('/gafareas', gafAreasFeatureCollection)
+function gafAreasDateRanges(req: express.Request, res: express.Response) {
+  res.json(gafforecast.dateRanges);
+}
+
+app.get('/lsalt/features', lsaltFeatureCollection)
+app.get('/gafareas/features', gafAreasFeatureCollection)
+app.get('/gafareas/dates', gafAreasDateRanges)
 
 // Duplicate endpoints to allow backend to proxy requests during local dev/text
-app.get('/lsalt', lsaltFeatureCollection)
-app.get('/lsalt/gafareas', gafAreasFeatureCollection)
+// app.get('/lsalt', lsaltFeatureCollection)
+// app.get('/lsalt/gafareas', gafAreasFeatureCollection)
 
 
 // locally provide $PORT

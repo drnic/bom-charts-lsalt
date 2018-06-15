@@ -10,8 +10,8 @@ export type Periods = { [fromUTC: string]: AreaForecast };
 export interface AreaForecast {
   page_code: string;
   gaf_area_id: string;
-  from: Date;
-  till: Date;
+  from: string;
+  till: string;
   issued_at: Date;
   standard_inclusion: string;
   areas: Area[];

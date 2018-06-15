@@ -13,12 +13,21 @@ export let nightMapAreaLSALT: turf.Feature[] = [];
 
 let gridID = 1;
 
+export interface DateRange {
+  from: string | Date;
+  until: string | Date;
+}
+export let dateRanges : DateRange[];
+
+
 /**
  * Hourly update of current/next Graphical Area Forecasts (GAF)
  */
 export function update() {
   dayMapAreaLSALT = [];
   nightMapAreaLSALT = [];
+  dateRanges = [];
+  let dateRangesSeen : { [d: string] : boolean } = {};
   gridID = 1;
 
   Object.keys(gaf.Period).forEach((period) => {
@@ -27,6 +36,13 @@ export function update() {
 
       request(url, (error, response, body) => {
         let forecastData : gaf.AreaForecast = JSON.parse(body);
+        if (!dateRangesSeen[forecastData.from]) {
+          dateRanges.push({
+            from: forecastData.from,
+            until: forecastData.till
+          });
+          dateRangesSeen[forecastData.from] = true;
+        }
 
         forecasts[gafAreaCode] = forecasts[gafAreaCode] || {};
         forecasts[gafAreaCode][forecastData.from.toString()] = forecastData;
