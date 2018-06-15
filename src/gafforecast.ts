@@ -94,13 +94,15 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
       }
 
       var areaCloudLayerBase = mapArea.cloudBase() === undefined ? 10000 : mapArea.cloudBase();
+      areaCloudLayerBase = Math.min(10000, areaCloudLayerBase);
       var cloudBaseLSALTDelta = areaCloudLayerBase - (lsalt * 100);
       var layerColourIndex = Math.round(cloudBaseLSALTDelta / 1000);
       var boundedIndex = Math.min(3, Math.max(0, layerColourIndex));
 
       lsaltIntersection.properties["id"] = gridID;
       gridID += 1;
-      lsaltIntersection.properties["lsalt_100ft"] = lsalt;
+      lsaltIntersection.properties["lsalt"] = lsalt * 100;
+      lsaltIntersection.properties["cloudBase"] = areaCloudLayerBase;
       lsaltIntersection.properties["lsaltColorLevel"] = layerColourIndex;
       lsaltIntersection.properties["lsaltColorLevelSameAsArea"] = mapArea.lsaltColorLevel() == boundedIndex ? 1 : 0;
       mapAreaLSALT.push(lsaltIntersection);
