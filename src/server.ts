@@ -34,7 +34,7 @@ function gafAreasEnvelopeFeatureCollection(req: express.Request, res: express.Re
 }
 
 function gafAreasDateRanges(req: express.Request, res: express.Response) {
-  res.json(gafforecast.dateRanges);
+  res.json(gafforecast.dateRanges());
 }
 
 function mapAreas(req: express.Request, res: express.Response) {

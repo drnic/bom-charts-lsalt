@@ -23,7 +23,7 @@ export interface DateRange {
   from: string | Date;
   until: string | Date;
 }
-export let dateRanges : DateRange[];
+export let dateRangesByFrom : { [from: string] : DateRange };
 
 
 /**
@@ -32,7 +32,7 @@ export let dateRanges : DateRange[];
 export function update() {
   dayMapAreaLSALT = [];
   nightMapAreaLSALT = [];
-  dateRanges = [];
+  dateRangesByFrom = {};
   let dateRangesSeen : { [d: string] : boolean } = {};
   gridID = 1;
 
@@ -42,12 +42,9 @@ export function update() {
 
       request(url, (error, response, body) => {
         let forecastData : gaf.AreaForecast = JSON.parse(body);
-        if (!dateRangesSeen[forecastData.from]) {
-          dateRanges.push({
-            from: forecastData.from,
-            until: forecastData.till
-          });
-          dateRangesSeen[forecastData.from] = true;
+        dateRangesByFrom[forecastData.from] = {
+          from: forecastData.from,
+          until: forecastData.till
         }
 
         forecasts[gafAreaCode] = forecasts[gafAreaCode] || {};
@@ -63,6 +60,20 @@ export function update() {
       });
     });
   })
+}
+
+/**
+ * Date ranges of available GAF periods, sorted from earliest to latest
+ */
+export function dateRanges() : DateRange[] {
+  return Object.values(dateRangesByFrom).sort((d1, d2) => {
+    if (d1.from < d2.from) {
+      return -1;
+    } else if (d1.from == d2.from) {
+      return 0;
+    }
+    return 1;
+  });
 }
 
 /**
