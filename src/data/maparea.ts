@@ -155,4 +155,10 @@ export class SubArea extends MapAreaBase {
 
   // returns "QLD-S-A", "TAS-B"
   groupLabel() { return this.mapArea.groupLabel(); }
+
+  asFeature() : turf.Feature<turf.Polygon, turf.Properties> {
+    let feature = super.asFeature();
+    feature.properties["subAreaID"] = this.subAreaID();
+    return feature;
+  }
 }
