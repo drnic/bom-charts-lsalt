@@ -48,7 +48,8 @@ abstract class MapAreaBase {
       "properties": {
         "mapLayerID": this.mapLayerID(),
         "lsaltColorLevel": this.lsaltColorLevel(),
-        "wxSummary": this.wxSummary()
+        "wxSummary": this.wxSummary(),
+        "groupLabel": this.groupLabel()
       },
       "geometry": {
         "type": "Polygon",

@@ -196,6 +196,7 @@ function buildMapAreas(areaForecast: gaf.AreaForecast) : maparea.MapArea[] {
 }
 
 
+// TODO: This doesn't seem as good as https://github.com/drnic/bom-charts/blob/master/public/gaf2/js/gaftable.js#L46-L48
 function combinedMapAreas(from? : string | Date) : MapAreasByGroup {
   let combined : MapAreasByGroup = {};
   Object.entries(mapAreasForPeriod(from)).forEach(
