@@ -1,5 +1,4 @@
 import * as gaf from './gaf';
-import * as gafforecast from '../gafforecast';
 import * as turf from '@turf/helpers';
 
 export type MapArea = MajorArea | SubArea;
@@ -77,6 +76,17 @@ abstract class MapAreaBase {
   abstract freezingLevel() : string;
   abstract mapLabel() : string;
   abstract mapLayerID() : string;
+
+  toJSON() : gaf.MapAreaExport {
+    return {
+      gafAreaCode: this.gafAreaCode,
+      mapLayerID: this.mapLayerID(),
+      mapLabel: this.mapLabel(),
+      gafAreaCodeAndGroup: this.gafAreaCodeAndGroup(),
+      freezingLevel: this.freezingLevel()
+      // wxConds: this.wxConds() - major only
+    }
+  }
 }
 
 export class MajorArea extends MapAreaBase {
@@ -110,6 +120,12 @@ export class MajorArea extends MapAreaBase {
 
   // Specific to MapMajorArea
   wxConds() { return this.gafMajorArea.wx_cond; }
+
+  toJSON() : gaf.MapAreaExport {
+    let base = super.toJSON();
+    base["wxConds"] = this.wxConds();
+    return base;
+  }
 }
 
 export class SubArea extends MapAreaBase {

@@ -4,6 +4,7 @@ import * as cfenv from 'cfenv';
 // import * as turf from 'turf';
 
 import * as lsalt from './data/lsalt';
+import * as maparea from './data/maparea';
 import * as gafforecast from './gafforecast';
 
 let app = express()
@@ -31,9 +32,19 @@ function gafAreasDateRanges(req: express.Request, res: express.Response) {
   res.json(gafforecast.dateRanges);
 }
 
+function mapAreas(req: express.Request, res: express.Response) {
+  res.json(gafforecast.mapareas);
+}
+
+function mapMajorAreas(req: express.Request, res: express.Response) {
+  res.json(gafforecast.majorAreas());
+}
+
 app.get('/api2/lsalt-features', lsaltFeatureCollection)
 app.get('/api2/gafareas-features', gafAreasFeatureCollection)
 app.get('/api2/gafareas-dates', gafAreasDateRanges)
+app.get('/api2/mapareas', mapAreas)
+app.get('/api2/mapareas/major', mapMajorAreas)
 
 // locally provide $PORT
 app.listen(appEnv.port);

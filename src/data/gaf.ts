@@ -83,3 +83,12 @@ export interface CommonArea {
   night_cloud_base: number;
   night_cloud_top: number;
 }
+
+export interface MapAreaExport {
+  gafAreaCode: string;
+  mapLayerID: string;
+  mapLabel: string;
+  gafAreaCodeAndGroup: any;
+  wxConds?: WxCond[];
+  freezingLevel?: string
+}

@@ -87,6 +87,20 @@ export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCo
   return turf.featureCollection(features);
 }
 
+export function majorAreas() : maparea.MapArea[] {
+  let list : maparea.MapArea[] = [];
+  Object.entries(mapareas).forEach(
+    ([gafAreaCode, areas]) => {
+      areas.forEach((mapArea: maparea.MapArea) => {
+        if (!mapArea.isSubArea()) {
+          list.push(mapArea);
+        }
+      })
+    }
+  );
+  return list;
+}
+
 function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
   let mapAreas = mapareas[gafAreaCode];
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
