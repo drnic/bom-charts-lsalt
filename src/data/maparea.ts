@@ -60,11 +60,11 @@ abstract class MapAreaBase {
 
   cloudBase(): number { return this.gafArea.day_cloud_base; }
   wxSummary(): string {
-    var text = this.mapLabel();
+    var text = `${this.gafAreaCode} ${this.mapLabel()}`;
     if (this.cloudBase() === undefined || this.cloudBase() === 999999) {
-      text += " has N/A clouds";
+      text += ` has N/A clouds`;
     } else {
-      text += " has cloud base " + this.cloudBase() + "MSL";
+      text += ` has cloud base ${this.cloudBase()}MSL`;
     }
     return text;
   }
