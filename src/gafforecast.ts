@@ -1,6 +1,8 @@
 import * as request from 'request';
 import * as turf from '@turf/helpers';
 import * as turfintersect from '@turf/intersect';
+import * as turfenvelope from '@turf/envelope';
+
 import * as backend from './data/backend';
 import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
@@ -85,6 +87,31 @@ export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCo
   );
 
   return turf.featureCollection(features);
+}
+
+/**
+ * Rectangular envelope of all MajorArea + SubArea polygons
+ * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
+ */
+export function gafAreasEnvelopeFeatureCollection(from?: string | Date) : turf.FeatureCollection {
+  let combinedAreas : turf.Feature[] = [];
+
+  Object.entries(mapareas).forEach(
+    ([gafAreaCode, areas]) => {
+      var areaBoundaryPoints: turf.Feature[] = areas.reduce((points, area) => {
+        let featurePoints = area.boundaryPoints().map((point) => {
+          return turf.point(point);
+        })
+        return points.concat(featurePoints);
+      }, []);
+
+      let feature = turfenvelope.default(turf.featureCollection(areaBoundaryPoints));
+      feature.properties["gafAreaCode"] = gafAreaCode;
+      combinedAreas.push(feature);
+    }
+  );
+
+  return turf.featureCollection(combinedAreas);
 }
 
 export function majorAreas() : maparea.MapArea[] {

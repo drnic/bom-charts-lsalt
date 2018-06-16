@@ -28,6 +28,11 @@ function gafAreasFeatureCollection(req: express.Request, res: express.Response) 
   res.json(gafforecast.gafAreasFeatureCollection(from));
 }
 
+function gafAreasEnvelopeFeatureCollection(req: express.Request, res: express.Response) {
+  let from = req.query["from"];
+  res.json(gafforecast.gafAreasEnvelopeFeatureCollection(from));
+}
+
 function gafAreasDateRanges(req: express.Request, res: express.Response) {
   res.json(gafforecast.dateRanges);
 }
@@ -42,6 +47,7 @@ function mapMajorAreas(req: express.Request, res: express.Response) {
 
 app.get('/api2/lsalt-features', lsaltFeatureCollection)
 app.get('/api2/gafareas-features', gafAreasFeatureCollection)
+app.get('/api2/gafareas-envelope', gafAreasEnvelopeFeatureCollection)
 app.get('/api2/gafareas-dates', gafAreasDateRanges)
 app.get('/api2/mapareas', mapAreas)
 app.get('/api2/mapareas/major', mapMajorAreas)
