@@ -8,8 +8,12 @@ import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
 import * as maparea from './data/maparea';
 
+export type MapAreasByGroup = { [gafAreaCode: string]: maparea.MapArea[] };
+// TODO: mapareas for all known time periods (currently it is for .current only)
+export let mapareas: MapAreasByGroup = {};
+
 export let forecasts: { [gafAreaCode: string]: gaf.Periods} = {};
-export let mapareas: { [gafAreaCode: string]: maparea.MapArea[] } = {};
+
 export let dayMapAreaLSALT: turf.Feature[] = [];
 export let nightMapAreaLSALT: turf.Feature[] = [];
 
@@ -62,6 +66,14 @@ export function update() {
 }
 
 /**
+ * GAF Major/Sub Areas, their geometries and WX for a given time period
+ * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
+ * TODO: support different "from"
+ */
+export function mapAreasForPeriod(from?: string | Date) : MapAreasByGroup {
+  return mapareas;
+}
+/**
  * Subset of LSALT grids indicating the gap between lowest cloud layer and LSALT height.
  * @param nightVFR If true, pilots must fly 1000-1360' above highest point in each LSALT grid. If false, pilots can fly lower and clouds can be lower.
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
@@ -78,7 +90,7 @@ export function lsaltFeatureCollection(nightVFR?: boolean, from?: string | Date)
  */
 export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCollection {
   let features : turf.Feature[] = [];
-  Object.entries(mapareas).forEach(
+  Object.entries(mapAreasForPeriod(from)).forEach(
     ([gafAreaCode, areas]) => {
       areas.forEach((mapArea: maparea.MapArea) => {
         features.push(mapArea.asFeature());
@@ -96,17 +108,17 @@ export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCo
 export function gafAreasEnvelopeFeatureCollection(from?: string | Date) : turf.FeatureCollection {
   let combinedAreas : turf.Feature[] = [];
 
-  Object.entries(mapareas).forEach(
-    ([gafAreaCode, areas]) => {
+  Object.entries(combinedMapAreas(from)).forEach(
+    ([groupLabel, areas]) => {
       var areaBoundaryPoints: turf.Feature[] = areas.reduce((points, area) => {
-        let featurePoints = area.boundaryPoints().map((point) => {
+        let featurePoints = area.boundaryPoints().map((point: number[]) => {
           return turf.point(point);
         })
         return points.concat(featurePoints);
       }, []);
 
       let feature = turfenvelope.default(turf.featureCollection(areaBoundaryPoints));
-      feature.properties["gafAreaCode"] = gafAreaCode;
+      feature.properties["groupLabel"] = groupLabel;
       combinedAreas.push(feature);
     }
   );
@@ -114,9 +126,9 @@ export function gafAreasEnvelopeFeatureCollection(from?: string | Date) : turf.F
   return turf.featureCollection(combinedAreas);
 }
 
-export function majorAreas() : maparea.MapArea[] {
+export function majorAreas(from?: string | Date) : maparea.MapArea[] {
   let list : maparea.MapArea[] = [];
-  Object.entries(mapareas).forEach(
+  Object.entries(mapAreasForPeriod(from)).forEach(
     ([gafAreaCode, areas]) => {
       areas.forEach((mapArea: maparea.MapArea) => {
         if (!mapArea.isSubArea()) {
@@ -128,8 +140,8 @@ export function majorAreas() : maparea.MapArea[] {
   return list;
 }
 
-function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean) {
-  let mapAreas = mapareas[gafAreaCode];
+function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: string | Date) {
+  let mapAreas = mapAreasForPeriod(from)[gafAreaCode];
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   lsalt.data[gafAreaCode].forEach(lsaltGrid => {
@@ -183,3 +195,17 @@ function buildMapAreas(areaForecast: gaf.AreaForecast) : maparea.MapArea[] {
   return result;
 }
 
+
+function combinedMapAreas(from? : string | Date) : MapAreasByGroup {
+  let combined : MapAreasByGroup = {};
+  Object.entries(mapAreasForPeriod(from)).forEach(
+    ([gafAreaCode, areas]) => {
+      areas.forEach((mapArea: maparea.MapArea) => {
+        let groupLabel = mapArea.groupLabel();
+        combined[groupLabel] = combined[groupLabel] || [];
+        combined[groupLabel].push(mapArea);
+      })
+    }
+  );
+  return combined;
+}
