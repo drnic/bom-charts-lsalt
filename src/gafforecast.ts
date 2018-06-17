@@ -10,8 +10,7 @@ import * as maparea from './data/maparea';
 import * as skyvector from './helpers/skyvector';
 
 export type MapAreasByGroup = { [gafAreaCode: string]: maparea.MapArea[] };
-// TODO: mapareas for all known time periods (currently it is for .current only)
-export let mapareas: MapAreasByGroup = {};
+export let mapareasByPeriod: { [period: string] : MapAreasByGroup } = {};
 
 export let forecasts: { [gafAreaCode: string]: gaf.Periods} = {};
 
@@ -34,10 +33,12 @@ export function update() {
   dayMapAreaLSALT = [];
   nightMapAreaLSALT = [];
   dateRangesByFrom = {};
-  let dateRangesSeen : { [d: string] : boolean } = {};
   gridID = 1;
 
-  Object.keys(gaf.Period).forEach((period) => {
+  Object.keys(gaf.Period).forEach((periodStr) => {
+    let period = gaf.toPeriod(periodStr);
+    mapareasByPeriod[periodStr] = {};
+
     gaf.areaCodes.forEach(gafAreaCode => {
       let url = backend.url(`/api/gafarea/${gafAreaCode}/${period}.json`);
 
@@ -53,11 +54,11 @@ export function update() {
         console.log(`${forecastData.gaf_area_id} ${forecastData.from} - ${lsalt.ready}`);
 
         // create MapAreas
-        mapareas[gafAreaCode] = buildMapAreas(forecastData);
+        mapareasByPeriod[period][gafAreaCode] = buildMapAreas(forecastData);
 
         // slice up MapAreas with LSALT grids for day & night
-        updateLSALTFeatures(gafAreaCode);
-        updateLSALTFeatures(gafAreaCode, true);
+        updateLSALTFeatures(gafAreaCode, false, gaf.toPeriod(period));
+        updateLSALTFeatures(gafAreaCode, true, period);
       });
     });
   })
@@ -79,18 +80,19 @@ export function dateRanges() : DateRange[] {
 
 /**
  * GAF Major/Sub Areas, their geometries and WX for a given time period
- * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
- * TODO: support different "from"
+ * @param period Use GAF period
+ * TODO: make period required
  */
-export function mapAreasForPeriod(from?: string | Date) : MapAreasByGroup {
-  return mapareas;
+export function mapAreasForPeriod(period?: gaf.Period) : MapAreasByGroup {
+  period = period || gaf.Period.current;
+  return mapareasByPeriod[period];
 }
 /**
  * Subset of LSALT grids indicating the gap between lowest cloud layer and LSALT height.
  * @param nightVFR If true, pilots must fly 1000-1360' above highest point in each LSALT grid. If false, pilots can fly lower and clouds can be lower.
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function lsaltFeatureCollection(nightVFR?: boolean, from?: string | Date) : turf.FeatureCollection {
+export function lsaltFeatureCollection(nightVFR?: boolean, period?: gaf.Period) : turf.FeatureCollection {
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   return turf.featureCollection(mapAreaLSALT);
@@ -100,9 +102,9 @@ export function lsaltFeatureCollection(nightVFR?: boolean, from?: string | Date)
  * Nationwide GAFs for a specific time period
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCollection {
+export function gafAreasFeatureCollection(period?: gaf.Period) : turf.FeatureCollection {
   let features : turf.Feature[] = [];
-  Object.entries(mapAreasForPeriod(from)).forEach(
+  Object.entries(mapAreasForPeriod(period)).forEach(
     ([gafAreaCode, areas]) => {
       areas.forEach((mapArea: maparea.MapArea) => {
         features.push(mapArea.asFeature());
@@ -117,10 +119,10 @@ export function gafAreasFeatureCollection(from?: string | Date) : turf.FeatureCo
  * Rectangular envelope of all MajorArea + SubArea polygons
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function gafAreasEnvelopeFeatureCollection(from?: string | Date) : turf.FeatureCollection {
+export function gafAreasEnvelopeFeatureCollection(period?: gaf.Period) : turf.FeatureCollection {
   let combinedAreas : turf.Feature[] = [];
 
-  Object.entries(combinedMapAreas(from)).forEach(
+  Object.entries(combinedMapAreas(period)).forEach(
     ([groupLabel, areas]) => {
       var areaBoundaryPoints: turf.Feature[] = areas.reduce((points, area) => {
         let featurePoints = area.boundaryPoints().map((point: number[]) => {
@@ -138,9 +140,9 @@ export function gafAreasEnvelopeFeatureCollection(from?: string | Date) : turf.F
   return turf.featureCollection(combinedAreas);
 }
 
-export function majorAreas(from?: string | Date) : maparea.MapArea[] {
+export function majorAreas(period?: gaf.Period) : maparea.MapArea[] {
   let list : maparea.MapArea[] = [];
-  Object.entries(mapAreasForPeriod(from)).forEach(
+  Object.entries(mapAreasForPeriod(period)).forEach(
     ([gafAreaCode, areas]) => {
       areas.forEach((mapArea: maparea.MapArea) => {
         if (!mapArea.isSubArea()) {
@@ -152,12 +154,12 @@ export function majorAreas(from?: string | Date) : maparea.MapArea[] {
   return list;
 }
 
-function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: string | Date) {
+function updateLSALTFeatures(gafAreaCode: string, nightVFR: boolean, period: gaf.Period) {
   // Disabling VIC today due to https://github.com/w8r/martinez/issues/74#issuecomment-397911190
   if (gafAreaCode === "VIC") {
     return;
   }
-  let mapAreas = mapAreasForPeriod(from)[gafAreaCode];
+  let mapAreas = mapAreasForPeriod(period)[gafAreaCode];
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   lsalt.data[gafAreaCode].forEach(lsaltGrid => {
@@ -213,9 +215,9 @@ function buildMapAreas(areaForecast: gaf.AreaForecast) : maparea.MapArea[] {
 
 
 // TODO: This doesn't seem as good as https://github.com/drnic/bom-charts/blob/master/public/gaf2/js/gaftable.js#L46-L48
-function combinedMapAreas(from? : string | Date) : MapAreasByGroup {
+function combinedMapAreas(period?: gaf.Period) : MapAreasByGroup {
   let combined : MapAreasByGroup = {};
-  Object.entries(mapAreasForPeriod(from)).forEach(
+  Object.entries(mapAreasForPeriod(period)).forEach(
     ([gafAreaCode, areas]) => {
       areas.forEach((mapArea: maparea.MapArea) => {
         let groupLabel = mapArea.groupLabel();

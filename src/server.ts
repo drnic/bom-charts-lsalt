@@ -1,10 +1,9 @@
 import * as express from 'express';
 import * as URL from 'url';
 import * as cfenv from 'cfenv';
-// import * as turf from 'turf';
 
+import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
-import * as maparea from './data/maparea';
 import * as gafforecast from './gafforecast';
 
 let app = express()
@@ -24,27 +23,27 @@ function lsaltFeatureCollection(req: express.Request, res: express.Response) {
 }
 
 function gafAreasFeatureCollection(req: express.Request, res: express.Response) {
-  let from = req.query["from"];
-  res.json(gafforecast.gafAreasFeatureCollection(from));
+  let period = req.query["period"];
+  res.json(gafforecast.gafAreasFeatureCollection(gaf.toPeriod(period)));
 }
 
 function gafAreasEnvelopeFeatureCollection(req: express.Request, res: express.Response) {
-  let from = req.query["from"];
-  res.json(gafforecast.gafAreasEnvelopeFeatureCollection(from));
+  let period = req.query["period"];
+  res.json(gafforecast.gafAreasEnvelopeFeatureCollection(gaf.toPeriod(period)));
+}
+
+function mapAreas(req: express.Request, res: express.Response) {
+  let period = req.query["period"];
+  res.json(gafforecast.mapAreasForPeriod(gaf.toPeriod(period)));
+}
+
+function mapMajorAreas(req: express.Request, res: express.Response) {
+  let period = req.query["period"];
+  res.json(gafforecast.majorAreas(gaf.toPeriod(period)));
 }
 
 function gafAreasDateRanges(req: express.Request, res: express.Response) {
   res.json(gafforecast.dateRanges());
-}
-
-function mapAreas(req: express.Request, res: express.Response) {
-  let from = req.query["from"];
-  res.json(gafforecast.mapAreasForPeriod(from));
-}
-
-function mapMajorAreas(req: express.Request, res: express.Response) {
-  let from = req.query["from"];
-  res.json(gafforecast.majorAreas(from));
 }
 
 app.get('/api2/lsalt-features', lsaltFeatureCollection)

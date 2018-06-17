@@ -4,6 +4,12 @@ export enum Period {
   current = "current",
   next = "next",
 }
+export function toPeriod(periodStr: string) : Period {
+  if (periodStr == "next") {
+    return Period.next;
+  }
+  return Period.current;
+}
 
 export type Periods = { [fromUTC: string]: AreaForecast };
 
