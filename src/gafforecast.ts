@@ -153,7 +153,8 @@ export function majorAreas(from?: string | Date) : maparea.MapArea[] {
 }
 
 function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: string | Date) {
-  if (gafAreaCode !== "VIC") {
+  // Disabling VIC today due to https://github.com/w8r/martinez/issues/74#issuecomment-397911190
+  if (gafAreaCode === "VIC") {
     return;
   }
   let mapAreas = mapAreasForPeriod(from)[gafAreaCode];
@@ -168,19 +169,14 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: str
     }
 
     var lsaltPolygon = turf.polygon([grid]);
-    console.log(lsaltPolygon.geometry.coordinates);
 
     mapAreas.forEach(mapArea => {
       var mapAreaPolygon = mapArea.turfPolygon();
-      console.log(mapArea);
-      console.log(mapArea.boundaryPoints());
-      console.log(skyvector.url(mapArea.boundaryPoints()));
 
       var lsaltIntersection = turfintersect.default(mapAreaPolygon, lsaltPolygon)
       if (!lsaltIntersection) {
         return;
       }
-      console.log(`${gridID} - ${mapArea.gafAreaCodeAndGroup()}`);
 
       var areaCloudLayerBase = mapArea.cloudBase() === undefined ? 10000 : mapArea.cloudBase();
       areaCloudLayerBase = Math.min(10000, areaCloudLayerBase);
