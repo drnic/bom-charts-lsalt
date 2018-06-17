@@ -7,6 +7,7 @@ import * as backend from './data/backend';
 import * as gaf from './data/gaf';
 import * as lsalt from './data/lsalt';
 import * as maparea from './data/maparea';
+import * as skyvector from './helpers/skyvector';
 
 export type MapAreasByGroup = { [gafAreaCode: string]: maparea.MapArea[] };
 // TODO: mapareas for all known time periods (currently it is for .current only)
@@ -152,6 +153,9 @@ export function majorAreas(from?: string | Date) : maparea.MapArea[] {
 }
 
 function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: string | Date) {
+  if (gafAreaCode !== "VIC") {
+    return;
+  }
   let mapAreas = mapAreasForPeriod(from)[gafAreaCode];
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
@@ -164,14 +168,19 @@ function updateLSALTFeatures(gafAreaCode: string, nightVFR?: boolean, from?: str
     }
 
     var lsaltPolygon = turf.polygon([grid]);
+    console.log(lsaltPolygon.geometry.coordinates);
 
     mapAreas.forEach(mapArea => {
       var mapAreaPolygon = mapArea.turfPolygon();
+      console.log(mapArea);
+      console.log(mapArea.boundaryPoints());
+      console.log(skyvector.url(mapArea.boundaryPoints()));
 
       var lsaltIntersection = turfintersect.default(mapAreaPolygon, lsaltPolygon)
       if (!lsaltIntersection) {
         return;
       }
+      console.log(`${gridID} - ${mapArea.gafAreaCodeAndGroup()}`);
 
       var areaCloudLayerBase = mapArea.cloudBase() === undefined ? 10000 : mapArea.cloudBase();
       areaCloudLayerBase = Math.min(10000, areaCloudLayerBase);
