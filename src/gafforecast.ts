@@ -57,7 +57,7 @@ export function update() {
         mapareasByPeriod[period][gafAreaCode] = buildMapAreas(forecastData);
 
         // slice up MapAreas with LSALT grids for day & night
-        updateLSALTFeatures(gafAreaCode, false, gaf.toPeriod(period));
+        updateLSALTFeatures(gafAreaCode, false, period);
         updateLSALTFeatures(gafAreaCode, true, period);
       });
     });
@@ -81,18 +81,15 @@ export function dateRanges() : DateRange[] {
 /**
  * GAF Major/Sub Areas, their geometries and WX for a given time period
  * @param period Use GAF period
- * TODO: make period required
  */
-export function mapAreasForPeriod(period?: gaf.Period) : MapAreasByGroup {
-  period = period || gaf.Period.current;
+export function mapAreasForPeriod(period: gaf.Period) : MapAreasByGroup {
   return mapareasByPeriod[period];
 }
 /**
  * Subset of LSALT grids indicating the gap between lowest cloud layer and LSALT height.
  * @param nightVFR If true, pilots must fly 1000-1360' above highest point in each LSALT grid. If false, pilots can fly lower and clouds can be lower.
- * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function lsaltFeatureCollection(nightVFR?: boolean, period?: gaf.Period) : turf.FeatureCollection {
+export function lsaltFeatureCollection(nightVFR: boolean) : turf.FeatureCollection {
   let mapAreaLSALT = nightVFR ? nightMapAreaLSALT : dayMapAreaLSALT;
 
   return turf.featureCollection(mapAreaLSALT);
@@ -102,7 +99,7 @@ export function lsaltFeatureCollection(nightVFR?: boolean, period?: gaf.Period) 
  * Nationwide GAFs for a specific time period
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function gafAreasFeatureCollection(period?: gaf.Period) : turf.FeatureCollection {
+export function gafAreasFeatureCollection(period: gaf.Period) : turf.FeatureCollection {
   let features : turf.Feature[] = [];
   Object.entries(mapAreasForPeriod(period)).forEach(
     ([gafAreaCode, areas]) => {
@@ -119,7 +116,7 @@ export function gafAreasFeatureCollection(period?: gaf.Period) : turf.FeatureCol
  * Rectangular envelope of all MajorArea + SubArea polygons
  * @param from TODO: Use GAF period that includes this timestamp; if string, then format "2018-06-14T23:00:00Z"
  */
-export function gafAreasEnvelopeFeatureCollection(period?: gaf.Period) : turf.FeatureCollection {
+export function gafAreasEnvelopeFeatureCollection(period: gaf.Period) : turf.FeatureCollection {
   let combinedAreas : turf.Feature[] = [];
 
   Object.entries(combinedMapAreas(period)).forEach(
@@ -215,7 +212,7 @@ function buildMapAreas(areaForecast: gaf.AreaForecast) : maparea.MapArea[] {
 
 
 // TODO: This doesn't seem as good as https://github.com/drnic/bom-charts/blob/master/public/gaf2/js/gaftable.js#L46-L48
-function combinedMapAreas(period?: gaf.Period) : MapAreasByGroup {
+function combinedMapAreas(period: gaf.Period) : MapAreasByGroup {
   let combined : MapAreasByGroup = {};
   Object.entries(mapAreasForPeriod(period)).forEach(
     ([gafAreaCode, areas]) => {
